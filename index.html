@@ -1,0 +1,79 @@
+<html>
+	<head>
+		<title>Test-Content Manager</title>
+		<script type="text/javascript" src="lib/jquery.js"></script>
+		<script type="text/javascript" src="lib/jquery.jstree.js"></script>
+		<!--<script type="text/javascript" src="lib/jquery.cookie.js"></script>
+		<script type="text/javascript" src="lib/jquery.hotkeys.js"></script>-->
+		<script type="text/javascript">
+			$(function () {
+				$("#file-tree")
+					.bind("loaded.jstree", function (event, data) {
+						//alert("TREE IS LOADED");
+					})
+					.bind("select_node.jstree", function (event, data) {
+						$.ajax({
+							url: "server.php",
+							dataType: "html",
+							data : { 
+								"operation" : "select_node", 
+								"path" : data.rslt.obj.attr("path")
+							},
+							success : function (r) {
+								$("#file-info").html(r);
+							}
+						});
+					})
+					.jstree({
+						"core" : { "initially_open" : [ "phtml_1" ] },
+						"plugins" : [ "themes", "json_data", "types", "ui" ],
+
+						// I usually configure the plugin that handles the data first
+						// This example uses JSON as it is most common
+						"json_data" : { 
+							// This tree is ajax enabled - as this is most common, and maybe a bit more complex
+							// All the options are almost the same as jQuery's AJAX (read the docs)
+							"ajax" : {
+								// the URL to fetch the data
+								"url" : "server.php",
+								// the `data` function is executed in the instance's scope
+								// the parameter is the node being loaded 
+								// (may be -1, 0, or undefined when loading the root nodes)
+								"data" : function (n) { 
+									// the result is fed to the AJAX request `data` option
+									return { 
+										"operation" : "get_children", 
+										"path" : n.attr ? n.attr("path") : ""
+									}; 
+								}
+							}
+						},
+						"types" : {
+							"max_children"  : -2,
+							"max_depth"     : -2,
+							"valid_children" : [ "default" ],
+							"types" : {
+								"default" : {
+									"valid_children" : "none",
+									"icon" : {
+										"image" : "images/file.png"
+									}
+								},
+								"folder" : {
+									"valid_children" : [ "default", "folder" ],
+									"icon" : {
+										"image" : "images/folder.png"
+									}
+								}
+							}
+						}
+					});
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Test-Content manager</h1>
+		<div id="file-tree" class="" style="width:500px;height:300px;float:left;"></div>
+		<div id="file-info" class="" style="width:200px;height:300px;float:left;"></div>
+	</body>
+</html>
