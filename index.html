@@ -24,9 +24,16 @@
 							}
 						});
 					})
+					.bind("move_node.jstree", function (e, data) {
+						console.log(e);
+						console.log(data);
+					})
 					.jstree({
 						"core" : { "initially_open" : [ "phtml_1" ] },
-						"plugins" : [ "themes", "json_data", "types", "ui" ],
+						"plugins" : [ "themes", "json_data", "types", "ui", "dnd" ],
+						"themes" : {
+							"theme" : "apple"
+						},
 
 						// I usually configure the plugin that handles the data first
 						// This example uses JSON as it is most common
@@ -74,6 +81,6 @@
 	<body>
 		<h1>Test-Content manager</h1>
 		<div id="file-tree" class="" style="width:500px;height:300px;float:left;"></div>
-		<div id="file-info" class="" style="width:200px;height:300px;float:left;"></div>
+		<div id="file-info" class="" style="width:400px;height:300px;float:left;"></div>
 	</body>
 </html>

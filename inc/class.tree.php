@@ -10,7 +10,7 @@ class _tree_struct {
 			"right"		=> false,
 			"level"		=> false
 		);
-	protected $root_dir = "/tmp";
+	protected $root_dir = "data";
 
 	// Constructor
 	function __construct($table = "tree", $fields = array()) {
@@ -36,28 +36,28 @@ class _tree_struct {
 
 	function _get_children($path, $recursive = false) {
 		$children = array();
-		$files = scandir($this->root_dir."/".$path);
-		//echo($this->root_dir."/".$path);
+		$files = scandir($this->_get_path($path, "", true));
 		foreach($files as $file) {
 			if ($file != "." && $file != "..") {
 				$type = "default";
-				if (is_dir($this->root_dir."/".$path."/".$file)) {
+				if (is_dir($this->_get_path($path, $file, true))) {
 					$type = "folder";
 				}
-				$children[] = array( title => $file, path => $path."/".$file, type => $type);
+				$children[] = array( title => $file, path => $this->_get_path($path, $file), type => $type);
 			}
 		}
 		return $children;
 	}
-	function _get_path($id) {
-		$node = $this->_get_node($id);
-		$path = array();
-		/*
-		if(!$node === false) return false;
-		$this->db->query("SELECT `".implode("` , `", $this->fields)."` FROM `".$this->table."` WHERE `".$this->fields["left"]."` <= ".(int) $node[$this->fields["left"]]." AND `".$this->fields["right"]."` >= ".(int) $node[$this->fields["right"]]);
-		while($this->db->nextr()) $path[$this->db->f($this->fields["id"])] = $this->db->get_row("assoc");
-		*/
-		return $path;
+	function _get_path($path, $file = "", $full = false) {
+		if ($full) {
+			$new_path = $this->root_dir."/";
+		}
+		if ($path == "") {
+			$new_path .= $file;
+		} else {
+			$new_path .= "/".$path."/".$file;
+		}
+		return $new_path;
 	}
 }
 
@@ -89,11 +89,17 @@ class json_tree extends _tree_struct {
 	}
 	
 	function select_node($data) {
-		//echo "data:".$data["path"]."\n";
-		//echo "command:file ".$this->root_dir."/".$data["path"];
-		$ret = shell_exec("file ".$this->root_dir."/".$data["path"]);
+		$ret = "";
+		
+		// check type
+		$mime_type = shell_exec("file --mime-type -b \"".$this->root_dir."/".$data["path"]."\"");
+		if (strpos($mime_type, "audio") !== false) {
+			$ret = shell_exec("mediainfo \"".$this->root_dir."/".$data["path"]."\"");
+		} else {
+			$ret = shell_exec("file \"".$this->root_dir."/".$data["path"]."\"");
+		}
 		//var_dump($ret);
-		return $ret;
+		return "<pre>".$ret."</pre>";
 	}
 }
 
